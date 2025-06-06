@@ -1,0 +1,4 @@
+monte_carlo_data/
+__pycache__/
+
+*.out
