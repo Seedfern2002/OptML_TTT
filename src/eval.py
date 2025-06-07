@@ -1,14 +1,14 @@
-import os
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
 import random
 from model import TicTacToeCNN
 from tqdm import tqdm
 import torch.nn.functional as F
 import argparse
+import os
+from torch.utils.data import Dataset, DataLoader
+import torch.nn as nn
+import torch.optim as optim
 
 class TicTacToeDataset(Dataset):
     def __init__(self, files, save_dir="monte_carlo_data"):
@@ -64,6 +64,7 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse"):
 
 def evaluate_models(model1, model2, games=5000):
     from tictactoe import TicTacToe
+
     def select_move(model, game):
         board = np.zeros((2, 3, 3))
         for i, v in enumerate(game.board):
@@ -74,11 +75,11 @@ def evaluate_models(model1, model2, games=5000):
         with torch.no_grad():
             probs = model(torch.tensor([board], dtype=torch.float32)).squeeze().numpy()
         legal = game.available_moves()
-        probs = np.array([probs[i//3][i%3] if i in legal else 0 for i in range(9)])
+        probs = np.array([probs[i//3][i % 3] if i in legal else 0 for i in range(9)])
         s = probs.sum()
         if s == 0:
             return random.choice(legal)
-        probs = probs / s 
+        probs = probs / s
         # print(f'sum of probs: {sum(probs)}')
         # use greedy policy
         # return the largest probability move
