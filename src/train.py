@@ -1,10 +1,21 @@
 from torch import optim, nn
-import tqdm
+from tqdm import tqdm
 
 
-def train_model(model, dataloader, epochs=1):
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    loss_fn = nn.MSELoss()
+def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse"):
+    if optimizer == "adam":
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
+    elif optimizer == "sgd":
+        optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    else:
+        raise ValueError("Unsupported optimizer. Use 'adam' or 'sgd'.")
+    
+    if criterion == "mse":
+        loss_fn = nn.MSELoss()
+    elif criterion == "cross_entropy":
+        loss_fn = nn.CrossEntropyLoss()
+    else:
+        raise ValueError("Unsupported criterion. Use 'mse' or 'cross_entropy'.")
     # use kl divergence loss for probabilities
     # loss_fn = nn.KLDivLoss()
     # TODO: try different loss func later
