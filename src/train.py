@@ -22,9 +22,15 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse"):
     for epoch in tqdm(range(epochs)):
         total_loss = 0
         for x, y in dataloader:
+            y = y.float()
             optimizer.zero_grad()
 
             y = y.view(-1, 9)
+            if criterion == "kl_div":
+                eps = 1e-8
+                y = y + eps
+                y = y / y.sum(dim=1, keepdim=True)
+
             pred = model(x).view(-1, 9)
 
             loss = loss_fn(pred, y)
