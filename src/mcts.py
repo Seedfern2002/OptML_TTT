@@ -13,7 +13,7 @@ def monte_carlo_probs(game, simulations=10000):
     probs = np.zeros(9)
     for move in game.available_moves():
         wins = 0
-        for _ in range(simulations):
+        for i in range(simulations):
             sim_game = game.clone()
             sim_game.make_move(move)
             result = random_playout(sim_game)

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class TicTacToeCNN(nn.Module):
     def __init__(self, kl_div=False):
         super(TicTacToeCNN, self).__init__()
@@ -20,5 +21,5 @@ class TicTacToeCNN(nn.Module):
             x = torch.sigmoid(self.fc2(x))
             return x.view(-1, 3, 3)
         else:
-            x = self.fc2(x)  
+            x = self.fc2(x)
             return F.log_softmax(x, dim=1).view(-1, 3, 3)
