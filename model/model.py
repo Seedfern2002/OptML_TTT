@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class TicTacToeCNN(nn.Module):
-    def __init__(self):
+    def __init__(self,:
         super(TicTacToeCNN, self).__init__()
         self.conv1 = nn.Conv2d(2, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
@@ -15,7 +15,8 @@ class TicTacToeCNN(nn.Module):
         x = F.relu(self.conv2(x))
         x = x.view(-1, 64 * 3 * 3)
         x = F.relu(self.fc1(x))
-        x = torch.sigmoid(self.fc2(x))  # Probability output for each cell
-        # x = self.fc2(x)
-        return x.view(-1, 3, 3)
-        # return F.log_softmax(x, dim=1).view(-1, 3, 3)
+        # for kl div
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1).view(-1, 3, 3)
+        # x = torch.sigmoid(self.fc2(x))  # Probability output for each cell
+        # return x.view(-1, 3, 3)
