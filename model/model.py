@@ -16,4 +16,6 @@ class TicTacToeCNN(nn.Module):
         x = x.view(-1, 64 * 3 * 3)
         x = F.relu(self.fc1(x))
         x = torch.sigmoid(self.fc2(x))  # Probability output for each cell
+        # x = self.fc2(x)
         return x.view(-1, 3, 3)
+        # return F.log_softmax(x, dim=1).view(-1, 3, 3)

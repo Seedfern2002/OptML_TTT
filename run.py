@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs.")
     parser.add_argument("--save_dir", type=str, default="results", help="Directory where dataset is stored.")
     parser.add_argument("--optimizer", type=str, choices=["adam", "sgd"], default="adam", help="Optimizer to use for training.")
-    parser.add_argument("--criterion", type=str, choices=["mse", "cross_entropy"], default="mse", help="Loss function to use for training.")
+    parser.add_argument("--criterion", type=str, choices=["mse", "cross_entropy", "kl_div"], default="mse", help="Loss function to use for training.")
     args = parser.parse_args()
     
     epoch = args.epochs

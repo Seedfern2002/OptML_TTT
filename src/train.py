@@ -14,16 +14,18 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse"):
         loss_fn = nn.MSELoss()
     elif criterion == "cross_entropy":
         loss_fn = nn.CrossEntropyLoss()
+    elif criterion == "kl_div":
+        loss_fn = nn.KLDivLoss(reduction='batchmean')
     else:
         raise ValueError("Unsupported criterion. Use 'mse' or 'cross_entropy'.")
-    # use kl divergence loss for probabilities
-    # loss_fn = nn.KLDivLoss()
-    # TODO: try different loss func later
+   
     for epoch in tqdm(range(epochs)):
         total_loss = 0
         for x, y in dataloader:
             optimizer.zero_grad()
-            pred = model(x)
+
+            y = y.view(-1, 9)
+            pred = model(x).view(-1, 9)
 
             loss = loss_fn(pred, y)
             loss.backward()
