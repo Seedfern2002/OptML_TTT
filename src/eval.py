@@ -1,57 +1,12 @@
-import os
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
 import random
 from model import TicTacToeCNN
-from tqdm import tqdm
-import torch.nn.functional as F
 
-class TicTacToeDataset(Dataset):
-    def __init__(self, files, save_dir="monte_carlo_data"):
-        self.save_dir = save_dir
-        self.files = files
-
-    def __len__(self):
-        return len(self.files)
-
-    def __getitem__(self, idx):
-        file_path = os.path.join(self.save_dir, self.files[idx])
-        data = np.load(file_path, allow_pickle=True)
-        x = torch.tensor(data[0], dtype=torch.float32)
-        y = torch.tensor(data[1], dtype=torch.float32)
-        return x, y
-
-def load_dataset(order="easy_to_hard", save_dir="monte_carlo_data"):
-    files = sorted([f for f in os.listdir(save_dir) if f.endswith(".npy")],
-                   key=lambda name: int(name.split("_")[0]),
-                   reverse=(order == "hard_to_easy"))
-    if order == 'random':
-        random.shuffle(files)
-    return DataLoader(TicTacToeDataset(files, save_dir), batch_size=32, shuffle=False)
-
-def train_model(model, dataloader, epochs=1):
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    loss_fn = nn.MSELoss()
-    # use kl divergence loss for probabilities
-    # loss_fn = nn.KLDivLoss()
-    # TODO: try different loss func later
-    for epoch in tqdm(range(epochs)):
-        total_loss = 0
-        for x, y in dataloader:
-            optimizer.zero_grad()
-            pred = model(x)
-
-            loss = loss_fn(pred, y)
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
-        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
 
 def evaluate_models(model1, model2, games=1000):
     from tictactoe import TicTacToe
+
     def select_move(model, game):
         board = np.zeros((2, 3, 3))
         for i, v in enumerate(game.board):
@@ -62,11 +17,11 @@ def evaluate_models(model1, model2, games=1000):
         with torch.no_grad():
             probs = model(torch.tensor([board], dtype=torch.float32)).squeeze().numpy()
         legal = game.available_moves()
-        probs = np.array([probs[i//3][i%3] if i in legal else 0 for i in range(9)])
+        probs = np.array([probs[i//3][i % 3] if i in legal else 0 for i in range(9)])
         s = probs.sum()
         if s == 0:
             return random.choice(legal)
-        probs = probs / s 
+        probs = probs / s
         # print(f'sum of probs: {sum(probs)}')
         # use greedy policy
         # return the largest probability move
