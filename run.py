@@ -16,6 +16,16 @@ from tqdm import tqdm
 
 
 if __name__ == "__main__":
+    # model_mse = TicTacToeCNN()
+    # model_mse.load_state_dict(torch.load('/mnt/aimm/scratch/yecheng/TTT/results/adam_mse_epoch_10/model_easy.pth'))
+    # model_mse.eval()
+
+    # model_ce = TicTacToeCNN()
+    # model_ce.load_state_dict(torch.load('/mnt/aimm/scratch/yecheng/TTT/results/adam_cross_entropy_epoch_10/model_easy.pth'))
+    # model_ce.eval()
+
+    # results = evaluate_models(model_mse, model_ce, games=1000)
+    # print("Results (MSE vs Cross Entropy):", results)
     # set random seed for reproducibility
     random.seed(42)
     np.random.seed(42)
