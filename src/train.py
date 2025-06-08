@@ -47,8 +47,8 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", 
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
-        wandb.log({"epoch": epoch + 1, "loss": total_loss})
+        print(f"Epoch {epoch+1}, Average Loss: {total_loss / len(dataloader):.4f}")
+        wandb.log({"epoch": epoch + 1, "loss": total_loss / len(dataloader)})
     wandb.finish()
 
 
@@ -99,8 +99,7 @@ def train_model_with_test(model, train_dataloader, test_dataloader, epochs=1, op
             optimizer.step()
             total_loss += loss.item()
         
-        print(f"Epoch {epoch+1}, Train Loss: {total_loss:.4f}")
-
+        print(f"Epoch {epoch+1}, Average Train Loss: {total_loss / len(train_dataloader):.4f}")
         # Evaluate on test set
         model.eval()
         test_loss = 0
@@ -111,7 +110,7 @@ def train_model_with_test(model, train_dataloader, test_dataloader, epochs=1, op
                 loss_test = loss_fn(pred_test, y_test)
                 test_loss += loss_test.item()
         
-        print(f"Epoch {epoch+1}, Test Loss: {test_loss:.4f}")
+        print(f"Epoch {epoch+1}, Average Test Loss: {test_loss / len(test_dataloader):.4f}")
 
-        wandb.log({"epoch": epoch + 1, "train_loss": total_loss, "test_loss": test_loss})
+        wandb.log({"epoch": epoch + 1, "train_loss": total_loss / len(train_dataloader), "test_loss": test_loss / len(test_dataloader)})
     wandb.finish()
