@@ -5,13 +5,15 @@ from src.mcts import monte_carlo_probs # Import MCTS
 from src.tictactoe import TicTacToe # Import TicTacToe
 
 
-def select_move(agent, game):
+def select_move(agent, game, criterion_choice=None): # Add criterion_choice parameter
     """
     Selects a move based on the agent's type.
 
     Args:
         agent: Can be a trained CNN model, 'mcts_agent', or 'random_agent'.
         game: The current TicTacToe game state.
+        criterion_choice: The loss function used for training the CNN model ('mse' or 'kl_div').
+                          Required when agent is a CNN model.
 
     Returns:
         The chosen move (integer from 0-8).
@@ -23,10 +25,25 @@ def select_move(agent, game):
                 board[0, i // 3, i % 3] = 1
             elif v == 'O':
                 board[1, i // 3, i % 3] = 1
+
         with torch.no_grad():
-            # Ensure the model output is correctly reshaped for 3x3 board
-            # probs = agent(torch.tensor([board], dtype=torch.float32)).squeeze().view(9).numpy() # for mse
-            probs = torch.exp(agent(torch.tensor([board], dtype=torch.float32)).squeeze()).view(9).numpy() # for kl divergence
+            raw_output = agent(torch.tensor([board], dtype=torch.float32)).squeeze().view(9)
+
+            if criterion_choice == "mse":
+                # For MSE, assuming the model directly outputs probabilities (or values to be interpreted as such)
+                # You might need to add a softmax here if your model outputs logits for MSE as well,
+                # but typically with MSE for probabilities, the last layer is sigmoid/linear.
+                # Let's assume the model output is already in a probability-like range [0,1] or can be directly used.
+                # If your model outputs logits for MSE, then torch.softmax would be needed.
+                probs = raw_output.numpy()
+            elif criterion_choice == "kl_div":
+                # For KL divergence, assuming the model outputs log-probabilities (or logits that need exp/softmax)
+                # If the model output is logits, use F.softmax. If it's log-probabilities, use torch.exp.
+                # Given your original comment 'torch.exp(agent(...)) # for kl divergence',
+                # we'll stick with torch.exp assuming the model outputs log-probabilities.
+                probs = torch.exp(raw_output).numpy()
+            else:
+                raise ValueError("criterion_choice must be 'mse' or 'kl_div' when agent is a CNN model.")
 
         legal = game.available_moves()
         # Filter probabilities for legal moves and re-normalize
@@ -64,7 +81,7 @@ def select_move(agent, game):
         raise ValueError("Unknown agent type provided to select_move.")
 
 
-def evaluate_agents(agent1, agent2, games=5000):
+def evaluate_agents(agent1, agent2, games=5000, agent1_criterion=None, agent2_criterion=None): # Add criterion parameters
     """
     Evaluates two agents playing Tic-Tac-Toe against each other.
 
@@ -72,6 +89,8 @@ def evaluate_agents(agent1, agent2, games=5000):
         agent1: The first agent (a trained CNN model, 'mcts_agent', or 'random_agent').
         agent2: The second agent (a trained CNN model, 'mcts_agent', or 'random_agent').
         games: Number of games to play.
+        agent1_criterion: The loss function used for training agent1 if it's a CNN model.
+        agent2_criterion: The loss function used for training agent2 if it's a CNN model.
 
     Returns:
         A dictionary with win counts for agent1, agent2, and draws.
@@ -81,12 +100,19 @@ def evaluate_agents(agent1, agent2, games=5000):
     for i in range(games):
         game = TicTacToe()
         # Alternate who goes first
-        players = [agent1, agent2] if i % 2 == 0 else [agent2, agent1]
+        players = [(agent1, agent1_criterion), (agent2, agent2_criterion)] if i % 2 == 0 else [(agent2, agent2_criterion), (agent1, agent1_criterion)]
         
         while game.winner() is None:
             # Determine which player's turn it is and select their corresponding agent
-            current_player_agent = players[0] if game.current_player == 'X' else players[1]
-            move = select_move(current_player_agent, game)
+            current_player_agent_info = players[0] if game.current_player == 'X' else players[1]
+            current_player_agent, current_agent_criterion = current_player_agent_info
+            
+            # Pass the criterion_choice to select_move only if it's a CNN model
+            if isinstance(current_player_agent, torch.nn.Module):
+                move = select_move(current_player_agent, game, criterion_choice=current_agent_criterion)
+            else:
+                move = select_move(current_player_agent, game) # For mcts_agent or random_agent
+
             game.make_move(move)
             
         result = game.winner()

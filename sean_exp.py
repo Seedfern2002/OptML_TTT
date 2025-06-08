@@ -4,7 +4,7 @@ import random
 import os
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
+import torch.nn.functional as F # Needed for softmax if you choose to use it
 from tqdm import tqdm
 
 # Import your modules
@@ -30,7 +30,9 @@ if __name__ == "__main__":
     # Hardcoded training parameters
     epochs = 10 # Renamed to plural for clarity
     optimizer_choice = "adam"
-    criterion_choice = "kl_div" # Or "cross_entropy", "kl_div"
+    # criterion_choice = "kl_div" # Or "mse" (assuming you will train with MSE later)
+    criterion_choice = "mse" # Or "mse" (assuming you will train with MSE later)
+                                # If you plan to switch to MSE, make sure your model output is suitable.
     
     # Define seeds for multiple runs
     seeds = [42, 101, 202, 303, 404] 
@@ -55,7 +57,9 @@ if __name__ == "__main__":
             print(f"Loading {curriculum_type} dataset...")
             data_loader = load_dataset(curriculum_type)
             print(f"Training {curriculum_type} model...")
-            model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
+            # Pass the criterion_choice to the model during initialization if its output layer depends on it
+            # (e.g., if kl_div implies log-softmax output vs. mse implying linear output)
+            model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div")) 
             train_model(model, data_loader, epochs=epochs, optimizer=optimizer_choice, criterion=criterion_choice)
             
             model_name = f"model_{curriculum_type.replace('_to_', '_').replace('random', 'random_curriculum')}"
@@ -76,7 +80,11 @@ if __name__ == "__main__":
                 name1 = curriculum_model_names[i]
                 name2 = curriculum_model_names[j]
                 # Use default_eval_games for model vs model comparisons
-                results = evaluate_agents(models[name1], models[name2], games=default_eval_games)
+                # Pass the criterion_choice to evaluate_agents for both agents
+                results = evaluate_agents(models[name1], models[name2], 
+                                          games=default_eval_games, 
+                                          agent1_criterion=criterion_choice, 
+                                          agent2_criterion=criterion_choice)
                 comparison_name = f"{name1.replace('model_', '')} vs {name2.replace('model_', '')}"
                 current_seed_results[comparison_name] = results
                 print(f"Results ({comparison_name}): {results}")
@@ -85,7 +93,11 @@ if __name__ == "__main__":
         print("\n--- Evaluating Curriculum Models Against MCTS Agent ---")
         for model_name, model_obj in models.items():
             # Use mcts_eval_games for MCTS comparisons
-            results = evaluate_agents(model_obj, 'mcts_agent', games=mcts_eval_games)
+            # Pass the criterion_choice for the CNN model
+            results = evaluate_agents(model_obj, 'mcts_agent', 
+                                      games=mcts_eval_games, 
+                                      agent1_criterion=criterion_choice, 
+                                      agent2_criterion=None) # MCTS doesn't have a criterion
             comparison_name = f"{model_name.replace('model_', '')} vs MCTS_agent"
             current_seed_results[comparison_name] = results
             print(f"Results ({comparison_name}): {results}")
@@ -93,7 +105,11 @@ if __name__ == "__main__":
         print("\n--- Evaluating Curriculum Models Against Pure Random Actions ---")
         for model_name, model_obj in models.items():
             # Use default_eval_games for Random agent comparisons
-            results = evaluate_agents(model_obj, 'random_agent', games=default_eval_games)
+            # Pass the criterion_choice for the CNN model
+            results = evaluate_agents(model_obj, 'random_agent', 
+                                      games=default_eval_games, 
+                                      agent1_criterion=criterion_choice, 
+                                      agent2_criterion=None) # Random doesn't have a criterion
             comparison_name = f"{model_name.replace('model_', '')} vs Random_agent"
             current_seed_results[comparison_name] = results
             print(f"Results ({comparison_name}): {results}")
