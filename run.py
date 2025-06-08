@@ -24,8 +24,18 @@ if __name__ == "__main__":
     # model_ce.load_state_dict(torch.load('/mnt/aimm/scratch/yecheng/TTT/results/adam_cross_entropy_epoch_10/model_easy.pth'))
     # model_ce.eval()
 
+    # model_kl = TicTacToeCNN(kl_div=True)
+    # model_kl.load_state_dict(torch.load('/mnt/aimm/scratch/yecheng/TTT/results/adam_kl_div_epoch_10/model_easy.pth'))
+    # model_kl.eval()
+
     # results = evaluate_models(model_mse, model_ce, games=1000)
     # print("Results (MSE vs Cross Entropy):", results)
+
+    # results = evaluate_models(model_mse, model_kl, games=1000)
+    # print("Results (MSE vs KL Divergence):", results)
+
+    # results = evaluate_models(model_ce, model_kl, games=1000)
+    # print("Results (Cross Entropy vs KL Divergence):", results)
     # set random seed for reproducibility
     random.seed(42)
     np.random.seed(42)
@@ -38,34 +48,38 @@ if __name__ == "__main__":
     parser.add_argument("--save_dir", type=str, default="results", help="Directory where dataset is stored.")
     parser.add_argument("--optimizer", type=str, choices=["adam", "sgd"], default="adam", help="Optimizer to use for training.")
     parser.add_argument("--criterion", type=str, choices=["mse", "cross_entropy", "kl_div"], default="mse", help="Loss function to use for training.")
+    parser.add_argument("--no_momentum", action='store_true', dest='no_momentum', help="Use momentum in SGD optimizer.")
     args = parser.parse_args()
     
     epoch = args.epochs
     save_dir = args.save_dir
     optimizer_choice = args.optimizer
     criterion_choice = args.criterion
+    momentum_choice = not args.no_momentum
+    print(f"Training with {optimizer_choice} optimizer, {criterion_choice} criterion, momentum={momentum_choice}, for {epoch} epochs.")
     save_dir = os.path.join(save_dir, f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}')
+    save_dir += '_no_momentum' if args.no_momentum else ''
     os.makedirs(save_dir, exist_ok=True)
 
     print("Loading easy-to-hard dataset...")
     easy_loader = load_dataset("easy_to_hard")
     print("Training easy-to-hard model...")
     model_easy = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
-    train_model(model_easy, easy_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice)
+    train_model(model_easy, easy_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
     torch.save(model_easy.state_dict(), os.path.join(save_dir, "model_easy.pth"))
 
     print("Loading hard-to-easy dataset...")
     hard_loader = load_dataset("hard_to_easy")
     print("Training hard-to-easy model...")
     model_hard = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
-    train_model(model_hard, hard_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice)
+    train_model(model_hard, hard_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
     torch.save(model_hard.state_dict(), os.path.join(save_dir, "model_hard.pth"))
 
     print("Loading random dataset...")
     random_loader = load_dataset("random")
     print("Training random model...")
     model_random = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
-    train_model(model_random, random_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice)
+    train_model(model_random, random_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
     torch.save(model_random.state_dict(), os.path.join(save_dir, "model_random.pth"))
 
     print("Evaluating models...")
