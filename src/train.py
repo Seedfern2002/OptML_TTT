@@ -36,7 +36,6 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", 
         for x, y in dataloader:
             y = y.float()
             optimizer.zero_grad()
-
             y = y.view(-1, 9)
             if criterion == "kl_div":
                 eps = 1e-8
@@ -44,7 +43,6 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", 
                 y = y / y.sum(dim=1, keepdim=True)
 
             pred = model(x).view(-1, 9)
-
             loss = loss_fn(pred, y)
             loss.backward()
             optimizer.step()
