@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # Define default games for most evaluations and a reduced amount for MCTS
     default_eval_games = 5000
-    mcts_eval_games = 5000 # Reduced games for MCTS comparison
+    mcts_eval_games = 100 # Reduced games for MCTS comparison
 
     all_evaluation_results = {}
 
