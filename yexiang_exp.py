@@ -10,7 +10,7 @@ import os
 from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from src.eval import evaluate_models
+from src.eval_old import evaluate_models
 from src.train import train_model, train_model_with_test
 from tqdm import tqdm
 

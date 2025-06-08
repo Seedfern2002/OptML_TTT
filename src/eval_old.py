@@ -5,7 +5,7 @@ import random
 def evaluate_models(model1, model2, games=5000):
     from .tictactoe import TicTacToe
 
-    def select_move(model, game):
+    def select_move(model, game, kl_div=False):
         board = np.zeros((2, 3, 3))
         for i, v in enumerate(game.board):
             if v == 'X':
@@ -14,16 +14,16 @@ def evaluate_models(model1, model2, games=5000):
                 board[1, i // 3, i % 3] = 1
         with torch.no_grad():
             probs = model(torch.tensor([board], dtype=torch.float32)).squeeze().numpy()
+        if kl_div:
+            probs = np.exp(probs)
         legal = game.available_moves()
         probs = np.array([probs[i//3][i % 3] if i in legal else 0 for i in range(9)])
+        
         s = probs.sum()
         if s == 0:
             return random.choice(legal)
         probs = probs / s
-        # print(f'sum of probs: {sum(probs)}')
-        # use greedy policy
-        # return the largest probability move
-        # return np.argmax(probs)
+        
         return np.random.choice(range(9), p=probs)
 
     results = {"model1": 0, "model2": 0, "draw": 0}
