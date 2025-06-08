@@ -4,13 +4,14 @@ from tqdm import tqdm
 import wandb
 
 
-def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True):
+def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False):
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,
         "criterion": criterion,
         "momentum": momentum
-    }, name=f"{optimizer}_{criterion}_epoch_{epochs}"
+    }, name=f"{optimizer}_{criterion}_epoch_{epochs}",
+    mode="disabled" if disable_wandb else "online"
     )
     if optimizer == "adam":
         optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -52,13 +53,14 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", 
     wandb.finish()
 
 
-def train_model_with_test(model, train_dataloader, test_dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True):
+def train_model_with_test(model, train_dataloader, test_dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False):
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,
         "criterion": criterion,
         "momentum": momentum
-    }, name=f"{optimizer}_{criterion}_epoch_{epochs}"
+    }, name=f"{optimizer}_{criterion}_epoch_{epochs}", 
+    mode="disabled" if disable_wandb else "online"
     )
     if optimizer == "adam":
         optimizer = optim.Adam(model.parameters(), lr=0.001)
