@@ -180,9 +180,9 @@ def load_mcts_data(data_dir="../monte_carlo_data"):
                 for j in range(3):
                     idx = i * 3 + j
                     if board_input[0, i, j] == 1:
-                        board_list[idx] = 'X'
-                    elif board_input[1, i, j] == 1:
                         board_list[idx] = 'O'
+                    elif board_input[1, i, j] == 1:
+                        board_list[idx] = 'X'
             state_key = ''.join(board_list)
             mcts_data[state_key] = mcts_probs
     print(f"Loaded {len(mcts_data)} MCTS states.")
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # Define default games for most evaluations and a reduced amount for MCTS
     default_eval_games = 5000
-    mcts_eval_games = 100 # Reduced games for MCTS comparison
+    mcts_eval_games = 5000 # Reduced games for MCTS comparison
 
     all_evaluation_results = {}
 
