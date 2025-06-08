@@ -1,7 +1,7 @@
 import numpy as np
 import os
-from tictactoe import TicTacToe
-from mcts import monte_carlo_probs
+from src.tictactoe import TicTacToe
+from src.mcts import monte_carlo_probs
 from multiprocessing import Pool, cpu_count
 import random
 
@@ -62,7 +62,7 @@ def enumerate_states(game=None, visited=None):
 if __name__ == "__main__":
     np.random.seed(42)  
     random.seed(42)
-    os.makedirs("../monte_carlo_data", exist_ok=True)
+    os.makedirs("./monte_carlo_data", exist_ok=True)
     # collect all unique states (which includes terminal states)
     print("Enumerating states...")
     states = enumerate_states()
