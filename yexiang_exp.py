@@ -50,6 +50,7 @@ if __name__ == "__main__":
     parser.add_argument("--criterion", type=str, choices=["mse", "cross_entropy", "kl_div"], default="mse", help="Loss function to use for training.")
     parser.add_argument("--no_momentum", action='store_true', dest='no_momentum', help="Use momentum in SGD optimizer.")
     parser.add_argument("--with_test", action='store_true', dest='with_test', help="Whether to use test set for evaluation during training.")
+    parser.add_argument("--disable_wandb", action='store_true', dest='disable_wandb', help="Disable Weights & Biases logging.")
     args = parser.parse_args()
     
     epoch = args.epochs
@@ -57,6 +58,7 @@ if __name__ == "__main__":
     optimizer_choice = args.optimizer
     criterion_choice = args.criterion
     momentum_choice = not args.no_momentum
+    disable_wandb = args.disable_wandb
     print(f"Training with {optimizer_choice} optimizer, {criterion_choice} criterion, momentum={momentum_choice}, for {epoch} epochs.")
     save_dir = os.path.join(save_dir, f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}')
     save_dir += '_no_momentum' if args.no_momentum else ''
@@ -68,10 +70,10 @@ if __name__ == "__main__":
     if args.with_test:
         easy_loader = load_dataset("easy_to_hard", split='train')
         easy_test_loader = load_dataset("easy_to_hard", split='test')
-        train_model_with_test(model_easy, easy_loader, easy_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model_with_test(model_easy, easy_loader, easy_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     else:
         easy_loader = load_dataset("easy_to_hard")
-        train_model(model_easy, easy_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model(model_easy, easy_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     torch.save(model_easy.state_dict(), os.path.join(save_dir, "model_easy.pth"))
 
     print("Training hard-to-easy model...")
@@ -79,10 +81,10 @@ if __name__ == "__main__":
     if args.with_test:
         hard_loader = load_dataset("hard_to_easy", split='train')
         hard_test_loader = load_dataset("hard_to_easy", split='test')
-        train_model_with_test(model_hard, hard_loader, hard_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model_with_test(model_hard, hard_loader, hard_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     else:
         hard_loader = load_dataset("hard_to_easy")
-        train_model(model_hard, hard_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model(model_hard, hard_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     torch.save(model_hard.state_dict(), os.path.join(save_dir, "model_hard.pth"))
 
     print("Training random model...")
@@ -90,10 +92,10 @@ if __name__ == "__main__":
     if args.with_test:
         random_loader = load_dataset("random", split='train')
         random_test_loader = load_dataset("random", split='test')
-        train_model_with_test(model_random, random_loader, random_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model_with_test(model_random, random_loader, random_test_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     else:
         random_loader = load_dataset("random")
-        train_model(model_random, random_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice)
+        train_model(model_random, random_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb)
     torch.save(model_random.state_dict(), os.path.join(save_dir, "model_random.pth"))
 
     print("Evaluating models...")
