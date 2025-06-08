@@ -160,7 +160,7 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def load_mcts_data(data_dir="../monte_carlo_data"):
+def load_mcts_data(data_dir="./monte_carlo_data"):
     """
     Loads pre-generated MCTS data from .npy files.
     Returns a dictionary mapping board state string to MCTS probabilities.
@@ -191,7 +191,7 @@ def load_mcts_data(data_dir="../monte_carlo_data"):
 
 if __name__ == "__main__":
     # Hardcoded training parameters
-    epochs = 10 # Renamed to plural for clarity
+    epochs = 5 # Renamed to plural for clarity
     optimizer_choice = "adam"
     criterion_choice = "mse" # Or "kl_div"
 

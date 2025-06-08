@@ -34,7 +34,7 @@ def process_state(state):
     y = monte_carlo_probs(game)
     state_key = ''.join(game.board)
     filename = f"{sum(1 for c in game.board if c != ' ')}_{abs(hash(state_key)) % 10**8}.npy"
-    save_dir = "../monte_carlo_data"
+    save_dir = "./monte_carlo_data"
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, filename)
     np.save(save_path, np.array([x, y], dtype=object))

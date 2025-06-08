@@ -9,7 +9,7 @@ def random_playout(game):
     return game.winner()
 
 
-def monte_carlo_probs(game, simulations=10000):
+def monte_carlo_probs(game, simulations=50000):
     probs = np.zeros(9)
     for move in game.available_moves():
         wins = 0

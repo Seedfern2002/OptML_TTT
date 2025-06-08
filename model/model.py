@@ -26,4 +26,5 @@ class TicTacToeCNN(nn.Module):
             return F.log_softmax(x, dim=1).view(-1, 3, 3)
         else:
             x = torch.sigmoid(self.fc2(x))
+
             return x.view(-1, 3, 3)
