@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from model.model import TicTacToeCNN
 from src.dataloader import load_dataset
 from src.eval import evaluate_agents
-from src.train import train_model, train_model_with_test # Import train_model_with_test
+from src.train import train_model, train_model_with_early_stopping
 
 
 def set_seed(seed):
@@ -22,6 +22,7 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed) # For multi-GPU setups
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
 
 def load_mcts_data(data_dir="./monte_carlo_data"):
     """
@@ -53,18 +54,16 @@ def load_mcts_data(data_dir="./monte_carlo_data"):
 
 
 if __name__ == "__main__":
-    # Hardcoded training parameters
     epochs = 5 # Renamed to plural for clarity
     optimizer_choice = "adam"
     criterion_choice = "mse" # Or "kl_div"
 
     # Define seeds for multiple runs
-    # seeds = [42, 101, 202, 303, 404]
-    seeds = [42]
+    seeds = [42, 101, 202, 303, 404]
 
     # Define default games for most evaluations and a reduced amount for MCTS
     default_eval_games = 5000
-    mcts_eval_games = 100 # Reduced games for MCTS comparison
+    mcts_eval_games = 5000 # Reduced games for MCTS comparison
 
     all_evaluation_results = {}
 
@@ -85,18 +84,17 @@ if __name__ == "__main__":
             print(f"Loading {curriculum_type} dataset...")
             # Use train_dataloader and test_dataloader for more detailed logging
             train_data_loader = load_dataset(curriculum_type)
-            test_data_loader = load_dataset(curriculum_type)
             print(f"Training {curriculum_type} model...")
             model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
-            train_model_with_test(model, train_data_loader, test_data_loader, epochs=epochs, optimizer=optimizer_choice, criterion=criterion_choice)
+            train_model(model, train_data_loader, epochs=epochs, optimizer=optimizer_choice, criterion=criterion_choice, disable_wandb=True, verbose=False)
 
             model_name = f"model_{curriculum_type.replace('_to_', '_').replace('random', 'random_curriculum')}"
             torch.save(model.state_dict(), os.path.join(seed_save_dir, f"{model_name}.pth"))
             model.eval() # Set to eval mode for evaluation
             models[model_name] = model
 
-        # Store results for this seed
-        current_seed_results = {}
+            # Store results for this seed
+            current_seed_results = {}
 
         print(f"\n--- Evaluating Models for Seed {seed} ---")
 
@@ -108,44 +106,44 @@ if __name__ == "__main__":
                 name1 = curriculum_model_names[i]
                 name2 = curriculum_model_names[j]
                 results = evaluate_agents(models[name1], models[name2],
-                                          games=default_eval_games,
-                                          agent1_criterion=criterion_choice,
-                                          agent2_criterion=criterion_choice)
+                                        games=default_eval_games,
+                                        agent1_criterion=criterion_choice,
+                                        agent2_criterion=criterion_choice)
                 comparison_name = f"{name1.replace('model_', '')} vs {name2.replace('model_', '')}"
                 current_seed_results[comparison_name] = results
                 print(f"Results ({comparison_name}): {results}")
 
-        # Comparisons with MCTS (using pre-computed data) and Random agents
-        print("\n--- Evaluating Curriculum Models Against Pre-computed MCTS Agent ---")
+            # Comparisons with MCTS (using pre-computed data) and Random agents
+            print("\n--- Evaluating Curriculum Models Against Pre-computed MCTS Agent ---")
         for model_name, model_obj in models.items():
             results = evaluate_agents(model_obj, 'mcts_data_agent', # Changed to 'mcts_data_agent'
-                                      games=mcts_eval_games,
-                                      agent1_criterion=criterion_choice,
-                                      agent2_criterion=None, # MCTS doesn't have a criterion
-                                      mcts_data=preloaded_mcts_data) # Pass the loaded data
+                                    games=mcts_eval_games,
+                                    agent1_criterion=criterion_choice,
+                                    agent2_criterion=None, # MCTS doesn't have a criterion
+                                    mcts_data=preloaded_mcts_data) # Pass the loaded data
             comparison_name = f"{model_name.replace('model_', '')} vs MCTS_data_agent"
             current_seed_results[comparison_name] = results
             print(f"Results ({comparison_name}): {results}")
 
-        print("\n--- Evaluating Curriculum Models Against Pure Random Actions ---")
+            print("\n--- Evaluating Curriculum Models Against Pure Random Actions ---")
         for model_name, model_obj in models.items():
             results = evaluate_agents(model_obj, 'random_agent',
-                                      games=default_eval_games,
-                                      agent1_criterion=criterion_choice,
-                                      agent2_criterion=None) # Random doesn't have a criterion
+                                    games=default_eval_games,
+                                    agent1_criterion=criterion_choice,
+                                    agent2_criterion=None) # Random doesn't have a criterion
             comparison_name = f"{model_name.replace('model_', '')} vs Random_agent"
             current_seed_results[comparison_name] = results
             print(f"Results ({comparison_name}): {results}")
 
 
-        all_evaluation_results[seed] = current_seed_results
+            all_evaluation_results[seed] = current_seed_results
 
         # Log results for the current seed to a file
         with open(os.path.join(seed_save_dir, "evaluation_results.txt"), "w") as f:
             f.write(f"--- Evaluation Results for Seed: {seed} ---\n\n")
             for comparison, res in current_seed_results.items():
                 f.write(f"Results ({comparison}): {res}\n")
-            f.write("\n")
+                f.write("\n")
 
     print("\n--- All Experiments Complete ---")
     print("\nSummary of all results (per seed):")
@@ -167,28 +165,43 @@ if __name__ == "__main__":
         os.makedirs(portion_save_dir, exist_ok=True)
 
         for curriculum_type in ["easy_to_hard", "hard_to_easy", "random"]:
+            # Load fixed test set once per curriculum type
+            test_data_loader = load_dataset(curriculum_type, split='test', data_percentage=1.0)
+
             for percentage in data_percentages:
-                print(f"Training {curriculum_type} model with {percentage*100}% of data...")
-                # Load dataset with the specified percentage
-                train_data_loader = load_dataset(curriculum_type, data_percentage=percentage)
-                test_data_loader = load_dataset(curriculum_type, data_percentage=percentage)
+                print(f"Training {curriculum_type} model with {percentage*100}% of training data...")
+                
+                # Load training set with specified percentage
+                train_data_loader = load_dataset(curriculum_type, split='train', data_percentage=percentage)
 
                 model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
-                train_model_with_test(model, train_data_loader, test_data_loader, epochs=epochs, optimizer=optimizer_choice, criterion=criterion_choice)
+                
+                # Use train_model_with_early_stopping for the data portion experiment
+                train_model_with_early_stopping(
+                    model, train_data_loader, test_data_loader,
+                    epochs=epochs, optimizer=optimizer_choice,
+                    criterion=criterion_choice, patience=10,
+                    min_delta=0.0001, disable_wandb=True, verbose=False
+                )
                 model.eval()
 
                 # Evaluate against MCTS data agent
                 print(f"Evaluating {curriculum_type} model ({percentage*100}% data) against MCTS_data_agent...")
-                results = evaluate_agents(model, 'mcts_data_agent',
-                                          games=mcts_eval_games,
-                                          agent1_criterion=criterion_choice,
-                                          agent2_criterion=None,
-                                          mcts_data=preloaded_mcts_data)
-                
-                win_rate = results["agent1_wins"] / mcts_eval_games
+                results = evaluate_agents(
+                    model, 'mcts_data_agent',
+                    games=mcts_eval_games,
+                    agent1_criterion=criterion_choice,
+                    agent2_criterion=None,
+                    mcts_data=preloaded_mcts_data
+                )
+
+                a1_win = results["agent1_wins"]
+                a2_win = results["agent2_wins"]
+                print(a1_win, a2_win)
+                win_rate = a1_win / (a1_win + a2_win)
                 data_portion_results[curriculum_type][percentage].append(win_rate)
-                print(f"Win rate for {curriculum_type} with {percentage*100}% data: {win_rate}")
-                
+                print(f"Win rate for {curriculum_type} with {percentage*100}% training data: {win_rate:.4f}")
+
                 # Save the model
                 model_portion_name = f"model_{curriculum_type.replace('_to_', '_').replace('random', 'random_curriculum')}_portion_{int(percentage*100)}"
                 torch.save(model.state_dict(), os.path.join(portion_save_dir, f"{model_portion_name}.pth"))
@@ -219,3 +232,107 @@ if __name__ == "__main__":
         plt.close()
 
     print("\nData portion experiment complete and plots generated.")
+    # --- New Experiment: Random Perturbation of Model Weights ---
+    print("\n--- Running Model Perturbation Experiment ---")
+    perturbation_strength = 0.01 # Define the strength of the perturbation
+    perturbation_results = {curriculum_type: [] for curriculum_type in ["easy_to_hard", "hard_to_easy", "random"]}
+
+    def perturb_model_weights(model, strength):
+        """Applies random perturbation to model weights."""
+        perturbed_model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
+        perturbed_model.load_state_dict(model.state_dict()) # Start with original weights
+        with torch.no_grad():
+            for param in perturbed_model.parameters():
+                param.add_(torch.randn(param.size()) * strength)
+        return perturbed_model
+
+    # Load original models once for each curriculum type (from the first seed's results)
+    print("\n--- Loading base models for perturbation experiment (from first seed) ---")
+    base_models = {}
+    base_seed_for_loading = seeds[0] # Use the first seed's trained models as base
+    base_model_dir = os.path.join("results", f'seed_{base_seed_for_loading}_{optimizer_choice}_{criterion_choice}_epoch_{epochs}')
+    for curriculum_type in ["easy_to_hard", "hard_to_easy", "random"]:
+        model_name = f"model_{curriculum_type.replace('_to_', '_').replace('random', 'random_curriculum')}"
+        model_path = os.path.join(base_model_dir, f"{model_name}.pth")
+        
+        model = TicTacToeCNN(kl_div=(criterion_choice == "kl_div"))
+        model.load_state_dict(torch.load(model_path))
+        model.eval()
+        base_models[curriculum_type] = model
+    print("Base models loaded.")
+
+    for seed in seeds: # This seed now controls the randomness of the perturbation
+        print(f"\n--- Model Perturbation Experiment with perturbation seed: {seed} ---")
+        set_seed(seed) # Set seed for the perturbation generation
+
+        perturb_save_dir = os.path.join("results", f'perturbation_seed_{seed}_{optimizer_choice}_{criterion_choice}_epoch_{epochs}')
+        os.makedirs(perturb_save_dir, exist_ok=True)
+
+        for curriculum_type in ["easy_to_hard", "hard_to_easy", "random"]:
+            original_model = base_models[curriculum_type]
+
+            print(f"Perturbing and evaluating {curriculum_type} model with seed {seed}...")
+            perturbed_model = perturb_model_weights(original_model, perturbation_strength)
+            
+            results = evaluate_agents(
+                perturbed_model, 'mcts_data_agent',
+                games=mcts_eval_games,
+                agent1_criterion=criterion_choice,
+                agent2_criterion=None,
+                mcts_data=preloaded_mcts_data
+            )
+
+            a1_win = results["agent1_wins"]
+            a2_win = results["agent2_wins"]
+            win_rate = a1_win / (a1_win + a2_win) if (a1_win + a2_win) > 0 else 0
+            perturbation_results[curriculum_type].append(win_rate)
+            print(f"Win rate for perturbed {curriculum_type} model (perturbation seed {seed}): {win_rate:.4f}")
+
+            # Optionally save the perturbed model (if needed for debugging/analysis)
+            # model_name = f"model_{curriculum_type.replace('_to_', '_').replace('random', 'random_curriculum')}"
+            # torch.save(perturbed_model.state_dict(), os.path.join(perturb_save_dir, f"{model_name}_perturbed_seed_{seed}.pth"))
+
+    # Calculate average win rates and plot for perturbation experiment
+    print("\n--- Plotting Perturbation Results ---")
+    perturb_plot_save_dir = os.path.join("results", "perturbation_plots")
+    os.makedirs(perturb_plot_save_dir, exist_ok=True)
+
+    avg_perturb_win_rates = []
+    std_perturb_win_rates = []
+    curriculum_labels = ["easy_to_hard", "hard_to_easy", "random"]
+
+    for ct in curriculum_labels:
+        rates = perturbation_results[ct]
+        avg_perturb_win_rates.append(np.mean(rates))
+        std_perturb_win_rates.append(np.std(rates))
+
+    x = np.arange(len(curriculum_labels))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    rects = ax.bar(x, avg_perturb_win_rates, width, yerr=std_perturb_win_rates, capsize=5)
+
+    ax.set_ylabel('Average Win Rate Against MCTS Data Agent')
+    ax.set_title(f'Win Rate of Perturbed Models (Strength: {perturbation_strength})')
+    ax.set_xticks(x)
+    ax.set_xticklabels([label.replace('_', ' ').title() for label in curriculum_labels]) # Nicer labels
+    ax.set_ylim(0, 1)
+    ax.grid(axis='y')
+
+    def autolabel(rects):
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate(f'{height:.2f}',
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    autolabel(rects)
+
+    plot_filename = os.path.join(perturb_plot_save_dir, f'perturbed_models_win_rate_strength_{perturbation_strength}.png')
+    plt.savefig(plot_filename)
+    print(f"Saved plot: {plot_filename}")
+    plt.close()
+
+    print("\nModel perturbation experiment complete and plots generated.")
