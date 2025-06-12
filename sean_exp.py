@@ -286,7 +286,7 @@ def run_training_experiments(epoch, save_dir, optimizer_choice, criterion_choice
     torch.manual_seed(42)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(42)
-
+        
     print(f"Training with {optimizer_choice} optimizer, {criterion_choice} criterion, momentum={momentum_choice}, for {epoch} epochs.")
     save_dir = os.path.join(save_dir, f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}')
     save_dir += '_no_momentum' if no_momentum else ''

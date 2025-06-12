@@ -40,6 +40,9 @@ class TicTacToeDataset(Dataset):
             if prefix not in hash_dict:
                 hash_dict[prefix] = []
             hash_dict[prefix].append(hash_value)
+        
+        for prefix in hash_dict.keys():
+            hash_dict[prefix].sort()
 
         test_hashes = get_test_set_hashes(hash_dict, ratio=test_size)
         test_files = [file for file in file_names if int(file.split("_")[1].split(".")[0]) in test_hashes]
