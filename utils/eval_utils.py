@@ -7,6 +7,7 @@ from model.model import TicTacToeCNN
 from tqdm import tqdm
 from src.data_generator import enumerate_states, board_to_input
 
+
 def evaluate_models(model1, model2, games=5000, kl_div=False):
     def select_move(model, game, kl_div=False):
         board = np.zeros((2, 3, 3))
@@ -51,6 +52,7 @@ def evaluate_models(model1, model2, games=5000, kl_div=False):
             results["draw"] += 1
     return results
 
+
 def eval_models_all_epochs(save_dir, order1, order2, games=5000, per_epochs = 1, kl_div=False):
     order1 = 'model_' + order1
     order2 = 'model_' + order2
@@ -79,6 +81,7 @@ def eval_models_all_epochs(save_dir, order1, order2, games=5000, per_epochs = 1,
         results[epoch][order2] = results_epoch["model2"]
         results[epoch]["draw"] = results_epoch["draw"]
     return results
+
 
 def get_highest_probability(models, mcts_data=None, kl_div=False):
     """
@@ -125,5 +128,33 @@ def get_highest_probability(models, mcts_data=None, kl_div=False):
                     probs = output
                 max_prob = torch.max(probs).item()
                 results[idx].append(max_prob)
-                
     return results, results_mcts
+
+
+def load_mcts_data(data_dir="./monte_carlo_data"):
+    """
+    Loads pre-generated MCTS data from .npy files.
+    Returns a dictionary mapping board state string to MCTS probabilities.
+    """
+    mcts_data = {}
+    print(f"Loading MCTS data from {data_dir}...")
+    for filename in tqdm(os.listdir(data_dir)):
+        if filename.endswith(".npy"):
+            file_path = os.path.join(data_dir, filename)
+            data = np.load(file_path, allow_pickle=True)
+            board_input = data[0]
+            mcts_probs = data[1]
+
+            # Reconstruct the board state string from the input array
+            board_list = [' ' for _ in range(9)]
+            for i in range(3):
+                for j in range(3):
+                    idx = i * 3 + j
+                    if board_input[0, i, j] == 1:
+                        board_list[idx] = 'O'
+                    elif board_input[1, i, j] == 1:
+                        board_list[idx] = 'X'
+            state_key = ''.join(board_list)
+            mcts_data[state_key] = mcts_probs
+    print(f"Loaded {len(mcts_data)} MCTS states.")
+    return mcts_data

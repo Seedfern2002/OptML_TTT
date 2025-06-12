@@ -6,7 +6,7 @@ import random
 import numpy as np
 
 
-def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False, log_file=None, save_per_epoch=False, save_dir=None, verbose=True):
+def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False, log_file=None, save_per_epoch=False, save_dir=None, verbose=False):
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,
