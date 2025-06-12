@@ -12,7 +12,7 @@ from model.model import TicTacToeCNN
 from src.dataloader import load_dataset
 from src.eval import evaluate_agents
 from src.train import train_model, train_model_with_early_stopping, train_model_with_test
-from utils.eval_utils import eval_models_all_epochs
+from utils.eval_utils import eval_models_all_epochs, get_highest_probability
 from utils.plot_utils import plot_loss, plot_win_to_loss_rate
 
 
@@ -380,6 +380,23 @@ def plot_all_training_results():
     plot_win_to_loss_rate("adam", "kl_div", 50)
     plot_win_to_loss_rate("sgd", "mse", 50)
 
+def get_models(model_name):
+    model_easy = TicTacToeCNN(kl_div=False)
+    model_easy.load_state_dict(torch.load(f'results/{model_name}/model_easy.pth'))
+    model_hard = TicTacToeCNN(kl_div=False)
+    model_hard.load_state_dict(torch.load(f'results/{model_name}/model_hard.pth'))
+    model_random = TicTacToeCNN(kl_div=False)
+    model_random.load_state_dict(torch.load(f'results/{model_name}/model_random.pth'))
+    return [model_easy.eval(), model_hard.eval(), model_random.eval()], ['easy2hard', 'hard2easy', 'random']
+
+def run_highest_probability_experiment(model_name, preloaded_mcts_data, save_dir='results', kl_div=False):
+    models, model_names = get_models(model_name)
+    prob_models, prob_mcts = get_highest_probability(models, preloaded_mcts_data, kl_div=kl_div)
+    with open(os.path.join(save_dir, f'{model_name}/highest_probabilities.txt'), 'w') as f:
+        for key, prob in prob_models.items():
+            f.write(f"{model_names[key]}: {np.mean(prob):.4f} ± {np.std(prob):.4f}\n")
+        f.write(f"MCTS data agent: {np.mean(prob_mcts):.4f} ± {np.std(prob_mcts):.4f}\n")
+
 
 if __name__ == "__main__":
     run_all_training_experiments()
@@ -421,3 +438,7 @@ if __name__ == "__main__":
     # Plot results for data portion and perturbation experiments
     plot_data_portion_results(combined_data_portion_results, data_percentages)
     plot_perturbation_results_by_strength(combined_perturbation_results, perturbation_strengths)
+
+    run_highest_probability_experiment('adam_mse_epoch_50', preloaded_mcts_data)
+    run_highest_probability_experiment('sgd_mse_epoch_50', preloaded_mcts_data)
+    run_highest_probability_experiment('adam_kl_div_epoch_50', preloaded_mcts_data, kl_div=True)
