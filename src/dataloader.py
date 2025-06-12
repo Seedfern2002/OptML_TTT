@@ -49,6 +49,7 @@ import os
 import numpy as np
 import torch
 import random
+from src.data_generator import enumerate_states
 
 
 class TicTacToeDataset(Dataset):
@@ -77,13 +78,19 @@ class TicTacToeDataset(Dataset):
     
     def get_train_test_split(self, test_size=0.2):
         file_names = self.files
-        hash_values = [int(name.split("_")[1].split(".")[0]) for name in file_names]
-        # take those idx with hash values less than 10**8 * test_size
-        threshold = int(10**8 * test_size)
-        test_idx = [i for i, h in enumerate(hash_values) if h < threshold]
-        train_idx = [i for i in range(len(file_names)) if i not in test_idx]
-        train_files = [file_names[i] for i in train_idx]
-        test_files = [file_names[i] for i in test_idx]
+
+        hash_dict = {}
+        for name in file_names:
+            prefix = int(name.split("_")[0])
+            hash_value = int(name.split("_")[1].split(".")[0])
+            if prefix not in hash_dict:
+                hash_dict[prefix] = []
+            hash_dict[prefix].append(hash_value)
+
+        test_hashes = get_test_set_hashes(hash_dict, ratio=test_size)
+        test_files = [file for file in file_names if int(file.split("_")[1].split(".")[0]) in test_hashes]
+        train_files = [file for file in file_names if file not in test_files]
+        print(f'Train/Test split: {len(train_files)} train files, {len(test_files)} test files')
         return train_files, test_files
 
     def subsample_by_difficulty(self, files, percentage):
@@ -112,6 +119,24 @@ class TicTacToeDataset(Dataset):
         # This sorting logic should align with load_dataset's ordering
         subsampled_files.sort(key=lambda name: int(name.split("_")[0])) 
         return subsampled_files
+
+def get_test_set_hashes(hash_dict, symmetries_save_dir="symmetries", ratio=0.2):
+    test_hash = set()
+    for prefix in hash_dict.keys():
+        temp_hash = set()
+        hashes = hash_dict[prefix]
+        total_hashes = len(hashes)
+        num_test_hashes = int(total_hashes * ratio)
+        for hash in hashes: 
+            symmetries_file = os.path.join(symmetries_save_dir, f"{prefix}_{hash}.npy")
+            symmetries = np.load(symmetries_file, allow_pickle=True)
+            if len(symmetries) > 0:
+                temp_hash.update(symmetries)
+            if len(temp_hash) >= num_test_hashes:
+                break
+        test_hash.update(temp_hash)
+    
+    return list(test_hash)
 
 
 def load_dataset(order="easy_to_hard", save_dir="monte_carlo_data", split=None, data_percentage=1.0):
