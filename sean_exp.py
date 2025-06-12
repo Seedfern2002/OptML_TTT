@@ -281,7 +281,12 @@ def run_all_curriculum_experiments(seeds, preloaded_mcts_data, epochs, optimizer
     return df
 
 def run_training_experiments(epoch, save_dir, optimizer_choice, criterion_choice, momentum_choice, disable_wandb, save_per_epoch, no_momentum, with_test, log_file):
-    
+    random.seed(42)
+    np.random.seed(42)
+    torch.manual_seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(42)
+        
     print(f"Training with {optimizer_choice} optimizer, {criterion_choice} criterion, momentum={momentum_choice}, for {epoch} epochs.")
     save_dir = os.path.join(save_dir, f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}')
     save_dir += '_no_momentum' if no_momentum else ''
@@ -352,7 +357,7 @@ def run_training_experiments(epoch, save_dir, optimizer_choice, criterion_choice
         }, f)
 
 def run_all_training_experiments():
-    epochs = 50
+    epochs = 1
     save_dir = 'results'
     no_momentum = False
     disable_wandb = True
