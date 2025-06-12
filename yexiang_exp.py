@@ -3,16 +3,11 @@ import torch
 import random
 from model.model import TicTacToeCNN
 from src.dataloader import load_dataset
-from tqdm import tqdm
-import torch.nn.functional as F
 import argparse
 import os
-from torch.utils.data import Dataset, DataLoader
-import torch.nn as nn
-import torch.optim as optim
 from src.eval_old import evaluate_models, eval_models_all_epochs
 from src.train import train_model, train_model_with_test
-from tqdm import tqdm
+import pickle
 
 
 if __name__ == "__main__":
@@ -95,18 +90,15 @@ if __name__ == "__main__":
         train_model(model_random, random_loader, epochs=epoch, optimizer=optimizer_choice, criterion=criterion_choice, momentum=momentum_choice, disable_wandb=disable_wandb, log_file=random_log_file if args.log_file else None, save_per_epoch=save_per_epoch, save_dir=model_save_dir)
     torch.save(model_random.state_dict(), os.path.join(save_dir, "model_random.pth"))
 
-    print("Evaluating models...")
-    print("Evaluating easy model against hard model...")
-    results_evh = evaluate_models(model_easy, model_hard)
-    print("Results (easy vs hard):", results_evh)
-    print("Evaluating easy model against random model...")
-    results_evr = evaluate_models(model_easy, model_random)
-    print("Results (easy vs random):", results_evr)
-    print("Evaluating hard model against random model...")
-    results_hvr = evaluate_models(model_hard, model_random)
-    print("Results (hard vs random):", results_hvr)
+    model_name = f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}'
+    
+    results_easy2hard = eval_models_all_epochs(f'results/{model_name}', "easy2hard", "hard2easy", per_epochs=5)
+    results_hard2easy = eval_models_all_epochs(f'results/{model_name}', "hard2easy", "random", per_epochs=5)
+    results_random = eval_models_all_epochs(f'results/{model_name}', "easy2hard", "random", per_epochs=5)
 
-    with open(os.path.join(save_dir, "evaluation_results.txt"), "w") as f:
-        f.write("Results (easy vs hard): " + str(results_evh) + "\n")
-        f.write("Results (easy vs random): " + str(results_evr) + "\n")
-        f.write("Results (hard vs random): " + str(results_hvr) + "\n")
+    with open(f'results/{model_name}/comparison_results.pkl', 'wb') as f:
+        pickle.dump({
+            "easy2hard_vs_hard2easy": results_easy2hard,
+            "hard2easy_vs_random": results_hard2easy,
+            "easy2hard_vs_random": results_random
+        }, f)
