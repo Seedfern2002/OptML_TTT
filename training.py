@@ -5,7 +5,7 @@ from model.model import TicTacToeCNN
 from src.dataloader import load_dataset
 import argparse
 import os
-from src.eval_old import evaluate_models, eval_models_all_epochs
+from utils.eval_utils import evaluate_models, eval_models_all_epochs
 from src.train import train_model, train_model_with_test
 import pickle
 
@@ -91,7 +91,10 @@ if __name__ == "__main__":
     torch.save(model_random.state_dict(), os.path.join(save_dir, "model_random.pth"))
 
     model_name = f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}'
-    
+    model_name += '_no_momentum' if args.no_momentum else ''
+    model_name += '_with_test' if args.with_test else ''
+    print("Evaluating models...")
+
     results_easy2hard = eval_models_all_epochs(f'results/{model_name}', "easy2hard", "hard2easy", per_epochs=5)
     results_hard2easy = eval_models_all_epochs(f'results/{model_name}', "hard2easy", "random", per_epochs=5)
     results_random = eval_models_all_epochs(f'results/{model_name}', "easy2hard", "random", per_epochs=5)
