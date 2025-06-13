@@ -1,5 +1,13 @@
 # TTTTT: The Impact of Training order in Tic-Tac-Toe
 ## Introduction
+This project explores how the **order of training samples** affects model performance in the game of **Tic-Tac-Toe**. We use **Monte Carlo Tree Search (MCTS)** to generate expert gameplay data and train a **Convolutional Neural Network (CNN)** to simulate the behavior of the MCTS agent.
+
+From a human perspective, game states with **more stones on the board** are often easier to evaluate, because there are fewer legal moves and the decision tree is shallower. This observation raises an interesting question:
+
+> *Does the order of training sample—starting from easy to hard, hard to easy, or random—affect the learning outcome of the model?*
+
+Let’s find out how training order shapes learning in Tic-Tac-Toe!
+
 ## File Structure
 
 - `src/`: Core source code for data generation, game logic, model training, and evaluation.
@@ -72,6 +80,8 @@ To train the model with your own configuration, run:
 ```bash
 python -m training
 ```
+It will run training with easy-to-hard, hard-to-easy, random orders and save the corresponding loss, competition results.
+
 You can customize the training process using the following command-line arguments:
   - `--epochs`: Number of training epochs (default: `10`).
   - `--save_dir`: Directory to save training results and model checkpoints (default: `"results"`).
