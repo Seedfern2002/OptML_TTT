@@ -4,6 +4,9 @@ import torch.nn.functional as F
 
 
 class TicTacToeCNN(nn.Module):
+    """
+    Base model for the project. If KLDiv Loss is used, need to use log_softmax to match KLDiv Loss input, otherwise use sigmoid for MSE.
+    """
     def __init__(self, kl_div=False, cross_entropy=False):
         super(TicTacToeCNN, self).__init__()
         self.conv1 = nn.Conv2d(2, 32, kernel_size=3, padding=1)
