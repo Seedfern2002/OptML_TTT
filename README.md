@@ -44,15 +44,7 @@ conda env create --file requirements.yml
 
 You can either **generate the data yourself** or **download it directly** (recommended).
 
-### Option 1: Generate the Data
-
-Run the following command:
-
-```bash
-python -m src.data_generator
-```
-
-### Option 2: Download the data
+### Option 1: Download the data
 You can download the dataset from the following link:  
 [Google Drive Folder](https://drive.google.com/drive/folders/1Nh7CXp5Gk3135Za5Cj1uRTLYP6VGn4Y3?usp=sharing)
 
@@ -62,6 +54,14 @@ The folder contains the following files:
 - **`symmetries.zip`**: Contains mappings of each game state to its symmetrical variants. This is used to ensure a proper train-test split by accounting for symmetrical duplicates.
 
 After downloading, unzip the files and place the folders `monte_carlo_data/` and `symmetries/` in the **root directory** of the experiment.
+
+### Option 2: Generate the Data
+
+Run the following command:
+
+```bash
+python -m src.data_generator
+```
 
 ## Getting Results
 
