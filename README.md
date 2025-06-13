@@ -13,9 +13,9 @@
 - `model/`:
   - `model.py`: Defines the CNN model architecture.
 
-- `training.py`: Entry-point script for training models, with configurable hyperparameters.
+- `training.py`: Script for training models, with configurable hyperparameters.
 
-- `experiments.py`: Contains core experiment functions for running and comparing different setups.
+- `experiments.py`: Contains core experiment functions for running and comparing different settings.
 
 - `run.ipynb`: Jupyter notebook for generating plots and tables from training and evaluation results.
 
