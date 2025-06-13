@@ -74,6 +74,9 @@ def process_state(state):
     
 
 def enumerate_states(game=None, visited=None):
+    """
+    Enumerate all possible states of Tic-Tac-Toe.
+    """
     if visited is None:
         visited = set()
     if game is None:
