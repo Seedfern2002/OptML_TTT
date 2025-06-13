@@ -1,5 +1,0 @@
-matplotlib==3.10.3
-numpy==2.3.0
-pandas==2.3.0
-torch==2.5.1+cu121
-tqdm==4.67.1

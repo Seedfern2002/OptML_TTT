@@ -37,7 +37,7 @@ Let’s find out how training order shapes learning in Tic-Tac-Toe!
 Install the required dependencies using:
 
 ```bash
-pip install -r requirements.txt
+conda env create --file requirements.yml
 ```
 
 ## Getting the Data
