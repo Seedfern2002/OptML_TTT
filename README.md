@@ -1,4 +1,4 @@
-# TTTTT: The Impact of Training order in Tic-Tac-Toe
+# TTTTT: The Impact of Training Order in Tic-Tac-Toe
 ## Introduction
 This project explores how the **order of training samples** affects model performance in the game of **Tic-Tac-Toe**. We use **Monte Carlo Tree Search (MCTS)** to generate expert gameplay data and train a **Convolutional Neural Network (CNN)** to simulate the behavior of the MCTS agent.
 
