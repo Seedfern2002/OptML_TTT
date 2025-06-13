@@ -25,7 +25,7 @@ Let’s find out how training order shapes learning in Tic-Tac-Toe!
 
 - `experiments.py`: Contains core experiment functions for running and comparing different settings.
 
-- `run.ipynb`: Jupyter notebook for generating plots and tables from training and evaluation results.
+- `run.ipynb`: Jupyter notebook for generating plots and tables from training and evaluation results. The first few cells are for training and running experiments, therefore it produces a lot of logs. To check the resulting plots and numbers, we advise you to check the last three cells. The entire run will take around 30 minutes.
 
 - `utils/`: Utility functions for evaluation and visualization.
   - `eval_utils.py`: Helpers for computing evaluation metrics.
