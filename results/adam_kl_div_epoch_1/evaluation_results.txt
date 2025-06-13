@@ -1,3 +1,0 @@
-Results (easy vs hard): {'model1': 2242, 'model2': 2179, 'draw': 579}
-Results (easy vs random): {'model1': 2190, 'model2': 2185, 'draw': 625}
-Results (hard vs random): {'model1': 2122, 'model2': 2284, 'draw': 594}
