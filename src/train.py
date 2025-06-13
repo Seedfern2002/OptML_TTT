@@ -7,6 +7,7 @@ import numpy as np
 
 
 def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False, log_file=None, save_per_epoch=False, save_dir=None, verbose=False):
+    """Train the model using the provided dataloader and parameters."""
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,
@@ -70,6 +71,7 @@ def train_model(model, dataloader, epochs=1, optimizer="adam", criterion="mse", 
 
 
 def train_model_with_early_stopping(model, train_dataloader, test_dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False, patience=5, min_delta=0.0001, verbose=True):
+    """Train the model with early stopping based on test loss."""
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,
@@ -159,6 +161,7 @@ def train_model_with_early_stopping(model, train_dataloader, test_dataloader, ep
     wandb.finish()
 
 def train_model_with_test(model, train_dataloader, test_dataloader, epochs=1, optimizer="adam", criterion="mse", momentum=True, disable_wandb=False, log_file=None, save_per_epoch=False, save_dir=None):
+    """Train the model and evaluate on the test set after each epoch."""
     wandb.init(project="tictactoe", config={
         "epochs": epochs,
         "optimizer": optimizer,

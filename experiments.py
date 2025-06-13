@@ -168,6 +168,7 @@ def run_all_curriculum_experiments(seeds, preloaded_mcts_data, epochs, optimizer
 
 
 def run_training_experiments(epoch, save_dir, optimizer_choice, criterion_choice, momentum_choice, disable_wandb, save_per_epoch, no_momentum, with_test, log_file):
+    """Train and evaluate models for all curriculum types and save results."""
     set_seed(42)
     save_dir = os.path.join(save_dir, f'{optimizer_choice}_{criterion_choice}_epoch_{epoch}')
     save_dir += '_no_momentum' if no_momentum else ''
@@ -236,6 +237,7 @@ def run_training_experiments(epoch, save_dir, optimizer_choice, criterion_choice
 
 
 def run_all_training_experiments():
+    """Run all main training experiments with various settings."""
     epochs = 50
     save_dir = 'results'
     no_momentum = False
@@ -250,6 +252,7 @@ def run_all_training_experiments():
 
 
 def get_models(model_name):
+    """Load trained models for each curriculum type from disk."""
     model_easy = TicTacToeCNN(kl_div=False)
     model_easy.load_state_dict(torch.load(os.path.join('results', model_name, "model_easy.pth")))
     model_hard = TicTacToeCNN(kl_div=False)
@@ -260,6 +263,7 @@ def get_models(model_name):
 
 
 def run_highest_probability_experiment(model_name, preloaded_mcts_data, save_dir='results', kl_div=False):
+    """Compute and save the highest output probability for each model and MCTS agent."""
     models, model_names = get_models(model_name)
     prob_models, prob_mcts = get_highest_probability(models, preloaded_mcts_data, kl_div=kl_div)
     save_path = os.path.join(save_dir, f'{model_name}', "highest_probabilities.txt")
@@ -275,6 +279,7 @@ def run_highest_probability_experiment(model_name, preloaded_mcts_data, save_dir
 
 
 def run_random_vs_mcts_experiment(seeds, preloaded_mcts_data, criterion_choice, default_eval_games):
+    """Evaluate random agent vs MCTS data agent for multiple seeds."""
     random_vs_mcts_rates = {}
     for seed in seeds:
         set_seed(seed)

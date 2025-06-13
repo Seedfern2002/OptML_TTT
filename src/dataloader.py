@@ -21,9 +21,11 @@ class TicTacToeDataset(Dataset):
             self.files = self.subsample_by_difficulty(self.files, data_percentage)
 
     def __len__(self):
+        """Return the number of files in the dataset."""
         return len(self.files)
 
     def __getitem__(self, idx):
+        """Return dataset item at the specified index."""
         file_path = os.path.join(self.save_dir, self.files[idx])
         data = np.load(file_path, allow_pickle=True)
         x = torch.tensor(data[0], dtype=torch.float32)
@@ -31,6 +33,7 @@ class TicTacToeDataset(Dataset):
         return x, y
     
     def get_train_test_split(self, test_size=0.2):
+        """Split dataset into train and test files based on the provided ratio."""
         file_names = self.files
 
         hash_dict = {}
@@ -78,6 +81,7 @@ class TicTacToeDataset(Dataset):
         return subsampled_files
 
 def get_test_set_hashes(hash_dict, symmetries_save_dir="symmetries", ratio=0.2):
+    """Generate test set hashes from the given hash dictionary."""
     test_hash = set()
     for prefix in hash_dict.keys():
         temp_hash = set()
@@ -97,6 +101,7 @@ def get_test_set_hashes(hash_dict, symmetries_save_dir="symmetries", ratio=0.2):
 
 
 def load_dataset(order="easy_to_hard", save_dir="monte_carlo_data", split=None, data_percentage=1.0):
+    """Load dataset and return a DataLoader instance."""
     files = sorted([f for f in os.listdir(save_dir) if f.endswith(".npy")],
                    key=lambda name: int(name.split("_")[0]),
                    reverse=(order == "hard_to_easy"))

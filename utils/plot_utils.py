@@ -5,6 +5,7 @@ import numpy as np
 
 
 def load_loss_data(file_path, with_test=False):
+    """Load loss values from a log file."""
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Log file {file_path} does not exist.")
     with open(file_path, 'r') as file:
@@ -23,6 +24,7 @@ def load_loss_data(file_path, with_test=False):
 
 
 def plot_loss(optimizer, loss_function, epochs, with_test=False, no_momentum=False):
+    """Plot training and/or test loss curves from log files."""
     save_dir = f"results/{optimizer}_{loss_function}_epoch_{epochs}"
     if no_momentum:
         save_dir += "_no_momentum"
@@ -52,6 +54,7 @@ def plot_loss(optimizer, loss_function, epochs, with_test=False, no_momentum=Fal
 
 
 def plot_win_to_loss_ratio(optimizer, loss_function, epochs, with_test=False, no_momentum=False):
+    """Plot win/loss ratio curves for model comparisons."""
     save_dir = f"results/{optimizer}_{loss_function}_epoch_{epochs}"
     if no_momentum:
         save_dir += "_no_momentum"
@@ -91,6 +94,7 @@ def plot_win_to_loss_ratio(optimizer, loss_function, epochs, with_test=False, no
 
 
 def plot_data_portion_results(data_portion_results, data_percentages):
+    """Plot win/loss rates as a function of data portion used for training."""
     for curriculum_type, percentage_data in data_portion_results.items():
         avg_win_rates = []
         std_win_rates = []
@@ -112,6 +116,7 @@ def plot_data_portion_results(data_portion_results, data_percentages):
 
 
 def plot_perturbation_results(perturbation_results, perturbation_strength):
+    """Plot win rates against MCTS agent for different perturbation strengths."""
     curriculum_labels = list(perturbation_results.keys())
     avg_win_rates = []
     std_win_rates = []
@@ -136,6 +141,7 @@ def plot_perturbation_results(perturbation_results, perturbation_strength):
 
 
 def plot_perturbation_results_by_strength(multi_results, strengths):
+    """Plot win/loss rates for multiple perturbation strengths and curricula."""
     curriculum_types = list(multi_results.keys())
     means_by_curriculum = {}
     stds_by_curriculum = {}
@@ -168,6 +174,7 @@ def plot_perturbation_results_by_strength(multi_results, strengths):
 
 
 def plot_all_training_results():
+    """Plot all main training and evaluation results."""
     plot_loss("adam", "mse", 50, with_test=False, no_momentum=False)
     plot_loss("adam", "mse", 50, with_test=True, no_momentum=False)
     plot_loss("adam", "kl_div", 50, with_test=False, no_momentum=False)

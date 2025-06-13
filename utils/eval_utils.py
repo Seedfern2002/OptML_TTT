@@ -9,7 +9,9 @@ from src.data_generator import enumerate_states, board_to_input
 
 
 def evaluate_models(model1, model2, games=5000, kl_div=False):
+    """Evaluate two models by playing them against each other."""
     def select_move(model, game, kl_div=False):
+        """Select a move for the given model and game state."""
         board = np.zeros((2, 3, 3))
         for i, v in enumerate(game.board):
             if v == 'X':
@@ -54,6 +56,7 @@ def evaluate_models(model1, model2, games=5000, kl_div=False):
 
 
 def eval_models_all_epochs(save_dir, order1, order2, games=5000, per_epochs = 1, kl_div=False):
+    """Evaluate models saved at each epoch for two training orders."""
     order1 = 'model_' + order1
     order2 = 'model_' + order2
     models_order1 = os.listdir(os.path.join(save_dir, order1))

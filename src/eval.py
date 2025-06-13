@@ -5,7 +5,7 @@ from src.mcts import monte_carlo_probs # Import MCTS
 from src.tictactoe import TicTacToe # Import TicTacToe
 
 
-def select_move(agent, game, criterion_choice=None, mcts_data=None): # Add mcts_data parameter
+def select_move(agent, game, criterion_choice=None, mcts_data=None):
     """
     Selects a move based on the agent's type.
 

@@ -3,6 +3,7 @@ import random
 
 
 def random_playout(game):
+    """Run a random playout until the game has a winner."""
     while not game.winner():
         move = random.choice(game.available_moves())
         game.make_move(move)
@@ -10,6 +11,7 @@ def random_playout(game):
 
 
 def monte_carlo_probs(game, simulations=50000):
+    """Estimate move probabilities using a Monte Carlo simulation."""
     probs = np.zeros(9)
     for move in game.available_moves():
         wins = 0
