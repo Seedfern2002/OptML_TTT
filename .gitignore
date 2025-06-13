@@ -1,5 +1,8 @@
 monte_carlo_data/
+symmetries/
 __pycache__/
 results/
-
+wandb/
+.ipynb_checkpoints/
+old/
 *.out

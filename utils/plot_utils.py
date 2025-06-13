@@ -51,7 +51,7 @@ def plot_loss(optimizer, loss_function, epochs, with_test=False, no_momentum=Fal
     plt.close()
 
 
-def plot_win_to_loss_rate(optimizer, loss_function, epochs, with_test=False, no_momentum=False):
+def plot_win_to_loss_ratio(optimizer, loss_function, epochs, with_test=False, no_momentum=False):
     save_dir = f"results/{optimizer}_{loss_function}_epoch_{epochs}"
     if no_momentum:
         save_dir += "_no_momentum"
@@ -79,7 +79,7 @@ def plot_win_to_loss_rate(optimizer, loss_function, epochs, with_test=False, no_
     # enlarge the font size of the plot, labels, ticks, and legend
     plt.tick_params(axis='both', which='major', labelsize=14)
     plt.xlabel('Epochs', fontsize=20)
-    plt.ylabel('Win to Loss Rate', fontsize=20)
+    plt.ylabel('Win / Loss Ratio', fontsize=20)
     plt.legend(fontsize=20)
     plt.grid(True)
     save_name = f"{optimizer}_{loss_function}_win_to_loss_rate"
@@ -169,8 +169,9 @@ def plot_perturbation_results_by_strength(multi_results, strengths):
 
 def plot_all_training_results():
     plot_loss("adam", "mse", 50, with_test=False, no_momentum=False)
+    plot_loss("adam", "mse", 50, with_test=True, no_momentum=False)
     plot_loss("adam", "kl_div", 50, with_test=False, no_momentum=False)
     plot_loss("sgd", "mse", 50, with_test=False, no_momentum=False)
-    plot_win_to_loss_rate("adam", "mse", 50)
-    plot_win_to_loss_rate("adam", "kl_div", 50)
-    plot_win_to_loss_rate("sgd", "mse", 50)
+    plot_win_to_loss_ratio("adam", "mse", 50)
+    plot_win_to_loss_ratio("adam", "kl_div", 50)
+    plot_win_to_loss_ratio("sgd", "mse", 50)
