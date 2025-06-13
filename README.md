@@ -40,11 +40,11 @@ After downloading, unzip the files and place the folders `monte_carlo_data/` and
 
 ## Getting Results
 
-To reproduce the results in the report, simply open and run the `run.ipynb` notebook. 
+To reproduce the results presented in the report, simply open and run the `run.ipynb` notebook.
 
-> **Note:** Although random seeds are fixed, you may not obtain *exactly* the same results as shown in the report. This is due to inherent sources of randomness in PyTorch, as discussed in their [reproducibility guidelines](https://pytorch.org/docs/stable/notes/randomness.html).  
->
-> That said, the overall trends and visualizations (e.g., accuracy curves, evaluation plots) should closely match the reported results, as the training process is generally stable.
+> **Note:** Although random seeds are fixed, you may not obtain *exactly* the same results as shown in the report due to sources of randomness in PyTorch, differences in operating systems, or using different devices (e.g., CPU vs. GPU).
+> See PyTorch's [reproducibility guidelines](https://pytorch.org/docs/stable/notes/randomness.html) for more information.
+> However, the overall trends and visualizations should remain similar, as the training process is generally stable.
 
 ## Train the Model with Custom Hyperparameters
 
