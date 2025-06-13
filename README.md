@@ -1,11 +1,28 @@
 # TTTTT: The Impact of Training order in Tic-Tac-Toe
 ## Introduction
 ## File Structure
-- `experiments.py`: contains all main experiment functions.
-- `run.ipynb`: a notebook that produces training and experiment results' (table and plots).
-- `training.py`: Script for training models. 
-- `src/`: contains Python files such as data generation & loader, Tic-Tac-Toe, etc.
-- `utils/`: contains Python files with helper functions for evaluation and plotting.
+
+- `src/`: Core source code for data generation, game logic, model training, and evaluation.
+  - `tictactoe.py`: Implementation of the Tic-Tac-Toe game environment.
+  - `mcts.py`: Runs the MCTS agent to generate gameplay data.
+  - `data_generator.py`: Uses self-play with MCTS to generate training data.
+  - `dataloader.py`: Loads training and test datasets.
+  - `train.py`: Training logic used by `training.py`.
+  - `eval.py`: Evaluation functions for assessing model performance.
+  
+- `model/`:
+  - `model.py`: Defines the CNN model architecture.
+
+- `training.py`: Entry-point script for training models, with configurable hyperparameters.
+
+- `experiments.py`: Contains core experiment functions for running and comparing different setups.
+
+- `run.ipynb`: Jupyter notebook for generating plots and tables from training and evaluation results.
+
+- `utils/`: Utility functions for evaluation and visualization.
+  - `eval_utils.py`: Helpers for computing evaluation metrics.
+  - `plot_utils.py`: Helpers for plotting experiment results.
+
 
 ## Install the dependency
 
