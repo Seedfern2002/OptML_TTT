@@ -6,3 +6,4 @@ wandb/
 .ipynb_checkpoints/
 old/
 *.out
+*.png

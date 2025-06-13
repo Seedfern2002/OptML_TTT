@@ -265,8 +265,12 @@ def run_highest_probability_experiment(model_name, preloaded_mcts_data, save_dir
     save_path = os.path.join(save_dir, f'{model_name}', "highest_probabilities.txt")
     with open(save_path, 'w') as f:
         for key, prob in prob_models.items():
-            f.write(f"{model_names[key]}: {np.mean(prob):.4f} ± {np.std(prob):.4f}\n")
-        f.write(f"MCTS data agent: {np.mean(prob_mcts):.4f} ± {np.std(prob_mcts):.4f}\n")
+            line = f"{model_names[key]}: {np.mean(prob):.4f} ± {np.std(prob):.4f}\n"
+            f.write(line)
+            print(line.strip())
+        line = f"MCTS data agent: {np.mean(prob_mcts):.4f} ± {np.std(prob_mcts):.4f}\n"
+        f.write(line)
+        print(line.strip())
     print(f"Results saved at: {save_path}")
 
 
